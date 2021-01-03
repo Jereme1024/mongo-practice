@@ -12,6 +12,10 @@ schema.virtual('postsSize').get(function() {
     return this.posts.length
 })
 
+schema.pre('deleteOne', function() {
+    throw new Error('No')
+})
+
 schema.index({ name: 'text' })
 
 module.exports = mongoose.model('users', schema)

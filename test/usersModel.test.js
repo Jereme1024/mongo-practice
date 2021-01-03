@@ -52,7 +52,7 @@ describe('Users', () => {
         expect(0).toBe(0)
     })
 
-    it.only('should partial search text', async () => {
+    it('should partial search text', async () => {
         await usersModel.insertMany([{
             name: 'alice wang',
         }, {
@@ -60,7 +60,20 @@ describe('Users', () => {
         }, {
             name: 'cathy wang',
         }])
+        const users = await usersModel.find({ $text: { $search: 'Wang' } })
+        console.log({ users })
+        expect(0).toBe(0)
+    })
 
+    it.only('should NOT deleteOne due to pre()', async () => {
+        await usersModel.insertMany([{
+            name: 'alice wang',
+        }, {
+            name: 'bob lee',
+        }, {
+            name: 'cathy wang',
+        }])
+        await usersModel.deleteOne({ name: 'bob lee' })
         const users = await usersModel.find({ $text: { $search: 'Wang' } })
         console.log({ users })
         expect(0).toBe(0)
