@@ -1,10 +1,5 @@
 const usersModel = require('../src/usersModel')
 const postsModel = require('../src/postsModel')
-const database = require('./inmemdb')
-
-beforeAll(async () => await database.connect())
-afterEach(async () => await database.clearDatabase())
-afterAll(async () => await database.closeDatabase())
 
 describe('Users', () => {
     it('should create an user', async () => {
@@ -65,7 +60,7 @@ describe('Users', () => {
         expect(0).toBe(0)
     })
 
-    it.only('should NOT deleteOne due to pre()', async () => {
+    it.skip('should NOT deleteOne due to pre()', async () => {
         await usersModel.insertMany([{
             name: 'alice wang',
         }, {
