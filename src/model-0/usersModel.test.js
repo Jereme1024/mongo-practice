@@ -1,5 +1,5 @@
-const usersModel = require('../src/usersModel')
-const postsModel = require('../src/postsModel')
+const usersModel = require('./usersModel')
+const postsModel = require('./postsModel')
 
 describe('Users', () => {
     it('should create an user', async () => {
