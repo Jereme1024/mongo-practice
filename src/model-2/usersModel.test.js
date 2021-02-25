@@ -4,85 +4,87 @@ const commentsModel = require('./commentsModel')
 
 describe('integrated user test', () => {
     it('should create a user with a post', async () => {
-        const user = await usersModel.create({ name: 'alice' })
-        const post = await postsModel.create({ title: 'Hello world' })
+        const user = await usersModel.create({ name: 'Elon Musk' })
+        const post = await postsModel.create({ title: 'Model S is released!' })
 
         user.posts.push(post)
         await user.save()
 
-        const alice = await usersModel.findOne({ name: 'alice' })
-        expect(alice.posts).toHaveLength(1)
-        console.log(alice)
-        const alicePost = await postsModel.findOne({ _id: alice.posts[0]._id })
-        expect(alicePost.title).toEqual('Hello world')
+        const musk = await usersModel.findOne({ name: 'Elon Musk' })
+        expect(musk.name).toEqual('Elon Musk')
+        expect(musk.posts).toHaveLength(1)
+        console.log(musk)
     })
 
     it('should create a user with a post and a comment', async () => {
-        const user = await usersModel.create({ name: 'alice' })
-        const post = await postsModel.create({ title: 'Hello world' })
-        const comment = await commentsModel.create({ content: 'Mongo is awesome', reviewer: user._id })
+        const user = await usersModel.create({ name: 'Elon Musk' })
+        const post = await postsModel.create({ title: 'Model S is released!' })
+        const comment1 = await commentsModel.create({ content: 'The fast car ever!', reviewer: user })
+        const comment2 = await commentsModel.create({ content: 'Awesome!!!!', reviewer: user })
 
-        post.comments.push(comment)
+        post.comments.push(comment1, comment2)
+        await post.save()
         user.posts.push(post)
-        await Promise.all([user.save(), post.save()])
+        await user.save()
 
-        const alice = await usersModel.findOne({ name: 'alice' })
-        expect(alice.posts).toHaveLength(1)
-        console.log(alice)
+        const musk = await usersModel.findOne({ name: 'Elon Musk' })
+        expect(musk.name).toEqual('Elon Musk')
+        expect(musk.posts).toHaveLength(1)
+        console.log(musk)
+        const muskPost = await postsModel.findOne({ title: 'Model S is released!' })
+        expect(muskPost.comments).toHaveLength(2)
     })
 
     it('should query a user with populating query', async () => {
-        const user = await usersModel.create({ name: 'alice' })
-        const post = await postsModel.create({ title: 'Hello world' })
-        const comment = await commentsModel.create({ content: 'Mongo is awesome', reviewer: user._id })
+        const user = await usersModel.create({ name: 'Elon Musk' })
+        const post = await postsModel.create({ title: 'Model S is released!' })
+        const comment = await commentsModel.create({ content: 'The fast car ever!', reviewer: user })
 
         post.comments.push(comment)
+        await post.save()
         user.posts.push(post)
-        await Promise.all([user.save(), post.save()])
+        await user.save()
 
-        let alice = await usersModel.findOne({ name: 'alice' }).populate('posts')
-        expect(alice.posts).toHaveLength(1)
-        expect(alice.posts[0].title).toEqual('Hello world')
-        console.log('[one level]', alice)
+        let musk = await usersModel.findOne({ name: 'Elon Musk' }).populate('posts')
+        expect(musk.name).toEqual('Elon Musk')
+        expect(musk.posts).toHaveLength(1)
+        expect(musk.posts[0].title).toEqual('Model S is released!')
+        console.log(JSON.stringify(musk, null, 2))
 
-        // two levels
-        alice = await usersModel.findOne({ name: 'alice' }).populate({ path: 'posts', populate: 'comments' })
-        console.log('[two levels]', JSON.stringify(alice, null, 2))
+        musk = await usersModel.findOne({ name: 'Elon Musk' }).populate({ path: 'posts', populate: { path: 'comments' } })
+        console.log(JSON.stringify(musk, null, 2))
 
-        // three levels
-        alice = await usersModel.findOne({ name: 'alice' }).populate({ path: 'posts', populate: { path: 'comments', populate: 'reviewer' } })
-        console.log('[three levels]', JSON.stringify(alice, null, 2))
+        musk = await usersModel.findOne({ name: 'Elon Musk' }).populate({ path: 'posts', populate: { path: 'comments', populate: { path: 'reviewer' } } })
+        console.log(JSON.stringify(musk, null, 2))
     })
 
     it('should remove automatically remove users post when a post is being removed', async () => {
-        const user = await usersModel.create({ name: 'alice' })
-        const post1 = await postsModel.create({ title: 'Hello' })
-        const post2 = await postsModel.create({ title: 'World' })
+        const user = await usersModel.create({ name: 'Elon Musk' })
+        const post1 = await postsModel.create({ title: 'New Model S is released!' })
+        const post2 = await postsModel.create({ title: 'Model Y is coming 666!' })
+
         user.posts.push(post1, post2)
         await user.save()
 
-        let alice = null
-        alice = await usersModel.findOne({ name: 'alice' }).populate('posts')
-        expect(alice.posts).toHaveLength(2)
-        console.log('[before remove]', alice)
+        let musk = await usersModel.findOne({ name: 'Elon Musk' }).populate('posts')
+        expect(musk.posts).toHaveLength(2)
 
-        await postsModel.remove({ _id: post1._id })
-        alice = await usersModel.findOne({ name: 'alice' }).populate('posts')
-        console.log('[after remove]', alice)
+        await postsModel.deleteOne({ title: 'New Model S is released!' })
+        musk = await usersModel.findOne({ name: 'Elon Musk' }).populate('posts')
+        expect(musk.posts).toHaveLength(1)
+        console.log(musk)
     })
 
     it('should NOT remove posts when a user is being removed', async () => {
-        const post1 = await postsModel.create({ title: 'Hello' })
-        const post2 = await postsModel.create({ title: 'World' })
-        const user = await usersModel.create({ name: 'alice', posts: [post1, post2] })
-        await commentsModel.create({ content: 'test', reviewer: user })
+        const user = await usersModel.create({ name: 'Elon Musk' })
+        const post1 = await postsModel.create({ title: 'New Model S is released!' })
+        const post2 = await postsModel.create({ title: 'Model Y is coming 666!' })
 
         user.posts.push(post1, post2)
         await user.save()
 
-        await usersModel.deleteOne({ name: 'alice' })
-
-        expect(await postsModel.countDocuments()).toBe(2)
-        expect(await commentsModel.countDocuments()).toBe(1)
+        await usersModel.deleteOne({ name: 'Elon Musk' })
+        const posts = await postsModel.find({})
+        expect(posts).toHaveLength(2)
     })
 })
