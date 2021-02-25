@@ -8,7 +8,7 @@ describe('integrated user test', () => {
         const post1 = await postsModel.create({ title: 'New Model S is available!' })
         const post2 = await postsModel.create({ title: 'Model X can really fly' })
         const user = await usersModel.create({ name: 'Elon Musk', posts: [post1, post2] })
-        await commentsModel.create({ content: 'test', reviewer: user })
+        await commentsModel.create({ content: 'The fastest car ever!', reviewer: user })
 
         user.posts.push(post1, post2)
         await user.save()
